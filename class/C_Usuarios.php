@@ -61,6 +61,7 @@ class C_Usuarios extends database
 
         // con PDF crea una setencia que inserte el cmapo nombre y el campo apellido, usando parametros
         $sql = "SELECT * FROM C_Usuarios WHERE usuario = :username";
+        unset($body['password']);
         $user = $this->Select($sql, $body);
         if (!is_array($user)) {
             return 'Usuario o contraseña incorrectos';
@@ -72,7 +73,7 @@ class C_Usuarios extends database
         }
 
         // aqui si esta el usuario
-        $passwordSecondaryDB = $user[0]->password_secondary;
+        $passwordSecondaryDB = $user[0]['password_secondary'];
 
         // Verificar la contraseña
         if (password_verify($pepperedPassword, $passwordSecondaryDB)) {
