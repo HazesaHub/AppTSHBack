@@ -16,6 +16,12 @@ $Router->post('/login', function ($req) {
     responseRequest($user->statusCode, $user->message, true, $user->data);
 });
 
+$Router->post('/loginSecondary', function ($req) {
+    $Login = new Login();
+    $user = $Login->LoginSecondary($req->body);
+    responseRequest($user->statusCode, $user->message, true, $user->data);
+});
+
 
 $Router->dafault(function () {
     responseRequest(
