@@ -5,6 +5,8 @@ include_once '../librerias/validateDataTypes.php';
 include_once '../config/config.php';
 include_once '../controllers/Controller.php';
 include_once '../controllers/Login.php';
+require '../vendor/autoload.php';
+
 // Dasdasdasdasdasdasdasd
 $Router = new Router();
 

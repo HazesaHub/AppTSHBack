@@ -1,8 +1,10 @@
 <?php
 include_once '../class/C_Usuarios.php';
+include_once '../class/M_Tokens.php';
 class Login extends Controller
 {
     private $C_Usuarios = null;
+    private $M_Tokens = null;
     public array $rules = [
         'username' => 'string|max_length:255|required',
         'password' => 'string|max_length:255|required',
@@ -16,6 +18,7 @@ class Login extends Controller
     public function __construct()
     {
         $this->C_Usuarios = new C_Usuarios();
+        $this->M_Tokens = new M_Tokens();
     }
 
     public function Login(object $body): object
@@ -57,10 +60,11 @@ class Login extends Controller
             }
         }
 
+        // aqui ya tengo los datos del usuario, ahora tengo que crear el token
+        $token = $this->M_Tokens->createToken((array) $usuario[0]);
         /// si esta el id entonces lo obtengo
-        return $this->response(200, false, 'Login correcto', $usuario);
+        return $this->response(200, false, 'Login correcto', array('token' => $token));
     }
-
     
     public function LoginSecondary(object $body): object
     {
@@ -101,8 +105,10 @@ class Login extends Controller
             }
         }
 
+        $token = $this->M_Tokens->createToken((array) $usuario[0]);
+
         /// si esta el id entonces lo obtengo
-        return $this->response(200, false, 'Login correcto', $usuario);
+        return $this->response(200, false, 'Login correcto', array('token' => $token));
     }
 
 }
