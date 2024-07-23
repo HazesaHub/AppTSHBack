@@ -5,13 +5,20 @@ include_once '../librerias/validateDataTypes.php';
 include_once '../config/config.php';
 include_once '../controllers/Controller.php';
 include_once '../controllers/Login.php';
+include_once '../controllers/Token.php';
 require '../vendor/autoload.php';
+// Definición de la variable global
+global $token;
+$token = null;
+
+// Obtener el token de la cabecera Authorization si está presente
+if (isset($_SERVER['HTTP_AUTHORIZATION']) && $_SERVER['HTTP_AUTHORIZATION'] !== '') {
+    $token = substr($_SERVER['HTTP_AUTHORIZATION'], 7); // Asumiendo el formato "Bearer <token>"
+}
 
 // Dasdasdasdasdasdasdasd
 $Router = new Router();
 
-
-//consultar
 $Router->post('/login', function ($req) {
     $Login = new Login();
     $user = $Login->Login($req->body);
@@ -22,6 +29,16 @@ $Router->post('/loginSecondary', function ($req) {
     $Login = new Login();
     $user = $Login->LoginSecondary($req->body);
     responseRequest($user->statusCode, $user->message, true, $user->data);
+});
+
+$Router->get('/Autentication', function ($req) {
+    global $token; // Acceder a la variable global aquí
+    if($token == null){
+        responseRequest(400, 'Token no enviado', true);
+    }
+    $tokenC = new Token($token);
+    $dataToken = $tokenC->ReadToken();
+    responseRequest($dataToken->statusCode, $dataToken->message, true, $dataToken->data);
 });
 
 
