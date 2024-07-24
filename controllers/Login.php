@@ -68,7 +68,6 @@ class Login extends Controller
             'apellido2' => $usuario->apellido2,
             'idTerminal' => (int) $usuario->id_terminal,
             'idEmpresa' => (int) $usuario->id_empresa_registro,
-            'imagen' => $usuario->imagen,
             'idPersona' => $usuario->id_persona,
         );
 
@@ -115,7 +114,6 @@ class Login extends Controller
             'apellido2' => $usuario->apellido2,
             'idTerminal' => (int) $usuario->id_terminal,
             'idEmpresa' => (int) $usuario->id_empresa_registro,
-            'imagen' => $usuario->imagen,
             'idPersona' => $usuario->id_persona,
         );
 

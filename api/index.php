@@ -47,7 +47,8 @@ $Router->get('/Autentication', function () {
 $Router->dafault(function () {
     responseRequest(
         404,
+        true,
         'Intenta con otra ruta',
-        true//era True
+        true
     );
 });

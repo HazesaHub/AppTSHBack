@@ -4,12 +4,15 @@ use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Firebase\JWT\SignatureInvalidException;
+
 class M_Tokens
 {
     public string|null $token;
     private string $privateKey;
     private string $publicKey;
     private string $encryptionKey;
+
+    private string $IvEncryptPayload;
 
     private int $exp = 28800;
 
@@ -19,8 +22,9 @@ class M_Tokens
         $this->privateKey = $this->getPrivateKey();
         $this->publicKey = $this->getPublicKey();
         $this->encryptionKey = $this->getEncryptionKey();
+        $this->IvEncryptPayload = $this->getIvEncryptPayload();
     }
- 
+
     private function getPrivateKey(): string | false
     {
         return file_get_contents(KeyPrivateEncryptToken);
@@ -36,35 +40,40 @@ class M_Tokens
         return file_get_contents(KeyEncryptPayload);
     }
 
+    private function getIvEncryptPayload(): string
+    {
+        return file_get_contents(KeyIVEncryptPayload);
+    }
+
     private function encryptPayload(array $payload): string
     {
         $plaintext = json_encode($payload);
         $cipher = "aes-256-cbc";
         $key = substr(hash('sha256', $this->encryptionKey, true), 0, 32);
-        $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length($cipher));
-
+        $iv = hex2bin($this->IvEncryptPayload); // Convertir el IV fijo de hexadecimal a binario
+    
         $ciphertext = openssl_encrypt($plaintext, $cipher, $key, 0, $iv);
-
-        return base64_encode($ciphertext . '::' . $iv);
+    
+        return base64_encode($ciphertext);
     }
-
-    private function decryptPayload(string $encryptedPayload): array|false
+    private function decryptPayload(string $encryptedPayload): array | false
     {
         $cipher = "aes-256-cbc";
         $key = substr(hash('sha256', $this->encryptionKey, true), 0, 32);
+        $iv = hex2bin($this->IvEncryptPayload); // Convertir el IV fijo de hexadecimal a binario
 
-        list($ciphertext, $iv) = explode('::', base64_decode($encryptedPayload), 2);
-        
+        $ciphertext = base64_decode($encryptedPayload);
         $plaintext = openssl_decrypt($ciphertext, $cipher, $key, 0, $iv);
-        if($plaintext === false) {
+
+        if ($plaintext === false) {
             return false;
         }
-        
+
         return json_decode($plaintext, true);
     }
 
     public function createToken(array $data): string | false
-    {   
+    {
         $data['iss'] = 'Hazesa';
         $data['aud'] = 'AppTSH';
         $data['exp'] = time() + $this->exp;
@@ -73,7 +82,7 @@ class M_Tokens
         $data['timezone'] = 'America/Mexico_City';
 
         $encryptedData = $this->encryptPayload($data);
-        return JWT::encode(array('data' =>$encryptedData), $this->privateKey, 'RS256');
+        return JWT::encode(array('data' => $encryptedData), $this->privateKey, 'RS256');
     }
 
     private function verifyToken(): array | false
@@ -97,7 +106,7 @@ class M_Tokens
     public function readToken(): array | false
     {
         $decoded = $this->verifyToken();
-        if($decoded === false) {
+        if ($decoded === false) {
             return false;
         }
 
@@ -107,11 +116,10 @@ class M_Tokens
     public function updateToken(array $data): string | false
     {
         $decoded = $this->readToken();
-        if($decoded === false) {
+        if ($decoded === false) {
             return false;
         }
         $decoded = array_merge($decoded, $data);
         return $this->createToken($decoded);
     }
 }
-?>
