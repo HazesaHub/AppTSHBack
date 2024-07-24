@@ -1,4 +1,6 @@
 <?php
+
+date_default_timezone_set('America/Mexico_City');
 include_once '../librerias/router.php';
 include_once '../librerias/responseRequest.php';
 include_once '../librerias/validateDataTypes.php';
