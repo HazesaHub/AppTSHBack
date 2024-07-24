@@ -2,26 +2,24 @@
 
 class Database
 {
-    private $host = DB_SERVERNAME;
-    private $db_name = DB_NAME;
-    private $username = DB_USERNAME;
-    private $password = DB_PASSWORD;
+    private $host;
+    private $db_name;
+    private $username;
+    private $password ;
     protected $conn;
 
     public function __construct()
     {
+        $this->host = DB_SERVERNAME;
+        $this->db_name = DB_NAME;
+        $this->username = DB_USERNAME;
+        $this->password = DB_PASSWORD;
         $this->conn = $this->getConnection();
     }
 
     protected function getConnection()
     {
         $this->conn = null;
-        $connectionInfo = array(
-            "Database" => $this->db_name,
-            "UID" => $this->username,
-            "PWD" => $this->password,
-        );
-
         // conexcion con PDO
         try {
             $this->conn = new PDO("sqlsrv:Server=" . $this->host . ";Database=" . $this->db_name, $this->username, $this->password);

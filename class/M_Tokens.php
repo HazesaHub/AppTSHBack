@@ -21,17 +21,17 @@ class M_Tokens
  
     private function getPrivateKey(): string | false
     {
-        return file_get_contents(Base_URL . 'private.key');
+        return file_get_contents(KeyPrivateEncryptToken);
     }
 
     private function getPublicKey(): string | false
     {
-        return file_get_contents(Base_URL . 'public.key');
+        return file_get_contents(KeyPublicEncryptToken);
     }
 
     private function getEncryptionKey(): string
     {
-        return file_get_contents(Base_URL . 'encryption.key');
+        return file_get_contents(KeyEncryptPayload);
     }
 
     private function encryptPayload(array $payload): string
@@ -61,7 +61,7 @@ class M_Tokens
     public function createToken(array $data): string | false
     {
         $encryptedData = $this->encryptPayload($data);
-        return JWT::encode(array($encryptedData), $this->privateKey, 'RS256');
+        return JWT::encode(array('data' =>$encryptedData), $this->privateKey, 'RS256');
     }
 
     private function verifyToken(): array | false
@@ -89,7 +89,7 @@ class M_Tokens
             return false;
         }
 
-        return $this->decryptPayload($decoded[0]);
+        return $this->decryptPayload($decoded['data']);
     }
 
     public function updateToken(array $data): string | false
