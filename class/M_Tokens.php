@@ -48,7 +48,7 @@ class M_Tokens
         return base64_encode($ciphertext . '::' . $iv);
     }
 
-    private function decryptPayload(string $encryptedPayload): array
+    private function decryptPayload(string $encryptedPayload): array|false
     {
         $cipher = "aes-256-cbc";
         $key = substr(hash('sha256', $this->encryptionKey, true), 0, 32);
@@ -56,6 +56,9 @@ class M_Tokens
         list($ciphertext, $iv) = explode('::', base64_decode($encryptedPayload), 2);
         
         $plaintext = openssl_decrypt($ciphertext, $cipher, $key, 0, $iv);
+        if($plaintext === false) {
+            return false;
+        }
         
         return json_decode($plaintext, true);
     }
