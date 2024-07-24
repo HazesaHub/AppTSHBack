@@ -14,13 +14,13 @@ class C_Usuarios extends database
         $body['password'] = sha1($body['password']);
 
         // con PDF crea una setencia que inserte el cmapo nombre y el campo apellido, usando parametros
-        $sql = "SELECT * FROM C_Usuarios WHERE usuario = :username AND password = :password";
+        $sql = "SELECT * FROM V_Usuarios WHERE usuario = :username AND password = :password";
         return $this->Select($sql, $body);
     }
 
     private function Get_AES_PEM_KEY(): string | false
     {
-        return file_get_contents(Base_URL . 'clave_aes.pem');
+        return file_get_contents(KeyEncryptUsers);
     }
 
     public function UpdateNewPassword(string $password): bool | string
@@ -52,15 +52,9 @@ class C_Usuarios extends database
 
     public function LoginSecondary(array $body): array|string
     {
-        $pepper = $this->Get_AES_PEM_KEY();
-        if ($pepper === false) {
-            return false;
-        }
-
-        $pepperedPassword = hash_hmac("sha256", $body['password'], $pepper);
-
         // con PDF crea una setencia que inserte el cmapo nombre y el campo apellido, usando parametros
-        $sql = "SELECT * FROM C_Usuarios WHERE usuario = :username";
+        $sql = "SELECT * FROM V_Usuarios WHERE usuario = :username";
+        $pepperedPassword = $body['password'];
         unset($body['password']);
         $user = $this->Select($sql, $body);
         if (!is_array($user)) {

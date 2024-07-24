@@ -59,9 +59,21 @@ class Login extends Controller
                 return $this->response(200, true, 'Error al actualizar la contraseña secundaria');
             }
         }
+        $usuario = (object) $usuario[0];
+        $dataUsuario = array(
+            'id_usuario' => (int) $usuario->id_usuario,
+            'nombre_usuario' => $usuario->nombre_usuario,
+            'nombre' => $usuario->nombre,
+            'apellido1' => $usuario->apellido1,
+            'apellido2' => $usuario->apellido2,
+            'idTerminal' => (int) $usuario->id_terminal,
+            'idEmpresa' => (int) $usuario->id_empresa_registro,
+            'imagen' => $usuario->imagen,
+            'idPersona' => $usuario->id_persona,
+        );
 
         // aqui ya tengo los datos del usuario, ahora tengo que crear el token
-        $token = $this->M_Tokens->createToken((array) $usuario[0]);
+        $token = $this->M_Tokens->createToken((array) $dataUsuario);
         /// si esta el id entonces lo obtengo
         return $this->response(200, false, 'Login correcto', array('token' => $token));
     }
@@ -94,18 +106,20 @@ class Login extends Controller
         if (empty($usuario)) {
             return $this->response(400, true, 'Usuario o contraseña incorrectos');
         }
+        $usuario = (object) $usuario[0];
+        $dataUsuario = array(
+            'id_usuario' => (int) $usuario->id_usuario,
+            'nombre_usuario' => $usuario->nombre_usuario,
+            'nombre' => $usuario->nombre,
+            'apellido1' => $usuario->apellido1,
+            'apellido2' => $usuario->apellido2,
+            'idTerminal' => (int) $usuario->id_terminal,
+            'idEmpresa' => (int) $usuario->id_empresa_registro,
+            'imagen' => $usuario->imagen,
+            'idPersona' => $usuario->id_persona,
+        );
 
-        // aqui hay usuario, hay que ver si ya tengo que actualizar o no la password_secundaria
-
-        if ($usuario[0]['password_secondary'] == null) {
-            $this->C_Usuarios->id_usuario = $usuario[0]['id_usuario'];
-            $login = $this->C_Usuarios->UpdateNewPassword($body->password);
-            if ($login !== true) {
-                return $this->response(200, true, 'Error al actualizar la contraseña secundaria');
-            }
-        }
-
-        $token = $this->M_Tokens->createToken((array) $usuario[0]);
+        $token = $this->M_Tokens->createToken((array) $dataUsuario);
 
         /// si esta el id entonces lo obtengo
         return $this->response(200, false, 'Login correcto', array('token' => $token));
