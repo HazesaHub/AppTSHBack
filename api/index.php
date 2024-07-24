@@ -24,23 +24,23 @@ $Router = new Router();
 $Router->post('/login', function ($req) {
     $Login = new Login();
     $user = $Login->Login($req->body);
-    responseRequest($user->statusCode, $user->message, true, $user->data);
+    responseRequest($user->statusCode,$user->error, $user->message, true, $user->data);
 });
 
 $Router->post('/loginSecondary', function ($req) {
     $Login = new Login();
     $user = $Login->LoginSecondary($req->body);
-    responseRequest($user->statusCode, $user->message, true, $user->data);
+    responseRequest($user->statusCode, $user->error, $user->message, true, $user->data);
 });
 
-$Router->get('/Autentication', function ($req) {
+$Router->get('/Autentication', function () {
     global $token; // Acceder a la variable global aquí
     if($token == null){
-        responseRequest(400, 'Token no enviado', true);
+        responseRequest(401, true, 'Token no enviado', true);
     }
     $tokenC = new Token($token);
     $dataToken = $tokenC->ReadToken();
-    responseRequest($dataToken->statusCode, $dataToken->message, true, $dataToken->data);
+    responseRequest($dataToken->statusCode, $dataToken->error, $dataToken->message, true, $dataToken->data);
 });
 
 
