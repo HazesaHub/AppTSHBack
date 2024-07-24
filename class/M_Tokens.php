@@ -11,6 +11,8 @@ class M_Tokens
     private string $publicKey;
     private string $encryptionKey;
 
+    private int $exp = 28800;
+
     public function __construct($token = null)
     {
         $this->token = $token;
@@ -59,7 +61,14 @@ class M_Tokens
     }
 
     public function createToken(array $data): string | false
-    {
+    {   
+        $data['iss'] = 'Hazesa';
+        $data['aud'] = 'AppTSH';
+        $data['exp'] = time() + $this->exp;
+        $data['nbf'] = time();
+        $data['iat'] = time();
+        $data['timezone'] = 'America/Mexico_City';
+
         $encryptedData = $this->encryptPayload($data);
         return JWT::encode(array('data' =>$encryptedData), $this->privateKey, 'RS256');
     }
