@@ -49,27 +49,62 @@ class M_Tokens
     {
         $plaintext = json_encode($payload);
         $cipher = "aes-256-cbc";
-        $key = substr(hash('sha256', $this->encryptionKey, true), 0, 32);
-        $iv = hex2bin($this->IvEncryptPayload); // Convertir el IV fijo de hexadecimal a binario
-    
-        $ciphertext = openssl_encrypt($plaintext, $cipher, $key, 0, $iv);
-    
+
+        // Decodifica la clave desde Base64
+        $key = base64_decode($this->encryptionKey);
+        if (strlen($key) !== 32) {
+            throw new Exception('Invalid key length. Must be 256 bits (32 bytes) for AES-256.');
+        }
+
+        // Decodifica el IV desde Base64
+        $iv = base64_decode($this->IvEncryptPayload); // Usa el IV previamente generado
+        if (strlen($iv) !== 16) {
+            throw new Exception('Invalid IV length. Must be 128 bits (16 bytes) for AES.');
+        }
+
+        // Cifra el texto plano
+        $ciphertext = openssl_encrypt($plaintext, $cipher, $key, OPENSSL_RAW_DATA, $iv);
+
+        if ($ciphertext === false) {
+            throw new Exception('Encryption failed.');
+        }
+
+        // Codifica el texto cifrado en Base64
         return base64_encode($ciphertext);
     }
+
     private function decryptPayload(string $encryptedPayload): array | false
     {
         $cipher = "aes-256-cbc";
-        $key = substr(hash('sha256', $this->encryptionKey, true), 0, 32);
-        $iv = hex2bin($this->IvEncryptPayload); // Convertir el IV fijo de hexadecimal a binario
 
+        // Decodifica la clave desde Base64
+        $key = base64_decode($this->encryptionKey);
+        if (strlen($key) !== 32) {
+            return false;
+        }
+
+        // Decodifica el IV desde Base64
+        $iv = base64_decode($this->IvEncryptPayload);
+        if (strlen($iv) !== 16) {
+            return false;
+        }
+
+        // Decodifica el texto cifrado desde Base64
         $ciphertext = base64_decode($encryptedPayload);
-        $plaintext = openssl_decrypt($ciphertext, $cipher, $key, 0, $iv);
 
+        // Descifra el texto cifrado
+        $plaintext = openssl_decrypt($ciphertext, $cipher, $key, OPENSSL_RAW_DATA, $iv);
         if ($plaintext === false) {
             return false;
         }
 
-        return json_decode($plaintext, true);
+        // Decodifica el JSON
+        $data = json_decode($plaintext, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return false;
+        }
+
+        return $data;
     }
 
     public function createToken(array $data): string | false
